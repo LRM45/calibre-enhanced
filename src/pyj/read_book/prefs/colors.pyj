@@ -80,7 +80,7 @@ def new_color_scheme(ev):
         elif inp.name.startswith('margin_'):
             pass
         else:
-            inp.value = {'name': '', 'bg': '#ffffff', 'fg': '#000000', 'link': '#0000ee'}[inp.name]
+            inp.value = {'name': '', 'bg': '#ffffff', 'fg': '#000000', 'link': '#0000ee', 'selection': '#5588ff', 'selection_fg': '#ffffff'}[inp.name]
     container.querySelector('input').focus()
     return container
 
@@ -98,6 +98,10 @@ def edit_color_scheme(ev):
         set_radio_group_value(container, 'link_color_type', 'custom' if scheme.link else 'default')
         if scheme.link:
             container.querySelector('input[name=link]').value = scheme.link
+        if scheme.selection:
+            container.querySelector('input[name=selection]').value = scheme.selection
+        if scheme.selection_fg:
+            container.querySelector('input[name=selection_fg]').value = scheme.selection_fg
         for which in MARGINS:
             attr = f'margin_{which}'
             val = scheme[attr]
@@ -161,7 +165,7 @@ def add_color_scheme(ev):
                 'You must specify a name for the color scheme'))
             return
 
-        for col in ('bg', 'fg', 'link'):
+        for col in ('bg', 'fg', 'link', 'selection', 'selection_fg'):
             if not check_color(col):
                 return
         for margin in MARGINS:
@@ -175,6 +179,8 @@ def add_color_scheme(ev):
         ucs[key] = {'name': name, 'foreground': colors.fg, 'background': colors.bg}
         if div.querySelector('input[name=link_color_type]:checked').value is 'custom':
             ucs[key].link = colors.link
+        ucs[key].selection = colors.selection
+        ucs[key].selection_fg = colors.selection_fg
         for margin in MARGINS:
             if div.querySelector(f'input[name=margin_{margin}_color_type]:checked').value is 'custom':
                 ucs[key][f'margin_{margin}'] = colors[f'margin_{margin}_bg'] + ':' + colors[f'margin_{margin}_fg']
@@ -287,6 +293,8 @@ def create_colors_panel(container, apply_func, cancel_func):
                     set_radio_group_value(ev.currentTarget.closest('td'), 'link_color_type', 'custom')
                 )
             )),
+            E.tr(E.td(_('Selection highlight:')), E.td(E.input(name='selection', type='color', value='#5588ff'))),
+            E.tr(E.td(_('Selection text:')), E.td(E.input(name='selection_fg', type='color', value='#ffffff'))),
             margin_row(_('Top margin:'), 'top'),
             margin_row(_('Bottom margin:'), 'bottom'),
             margin_row(_('Left margin:'), 'left'),
@@ -311,6 +319,6 @@ def commit_colors(onchange):
     sd.set('current_color_scheme', ccs)
     if cur_obc is not prev_obc:
         sd.set('override_book_colors', cur_obc)
-    if rcs.foreground is not c.dataset.fg or rcs.background is not c.dataset.bg or c.dataset.link is not rcs.link or cur_obc is not prev_obc:
+    if rcs.foreground is not c.dataset.fg or rcs.background is not c.dataset.bg or c.dataset.link is not rcs.link or c.dataset.selection is not rcs.selection or cur_obc is not prev_obc:
         ui_operations.update_color_scheme()
         onchange()

@@ -101,7 +101,12 @@ def apply_colors(is_content_popup):
         # priority than the override all selectors above
         text += f'\nhtml > body :link, html > body :link * {{ color: {c} !important }} html > body :visited, html > body :visited * {{ color: {c} !important }}'
 
-    selbg, selfg = default_selection_colors()
+    # Use selection color from scheme if available, otherwise default
+    if opts.color_scheme.selection:
+        selbg = opts.color_scheme.selection
+        selfg = opts.color_scheme.selection_fg if opts.color_scheme.selection_fg else '#ffffff'
+    else:
+        selbg, selfg = default_selection_colors()
     selbg = make_selection_background_opaque(selbg)
     text += f'\n::selection {{ background-color: {selbg}; color: {selfg} }}'
     text += f'\n::selection:window-inactive {{ background-color: {selbg}; color: {selfg} }}'
